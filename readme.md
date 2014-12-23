@@ -47,10 +47,6 @@ If you would like to install this package separately check "Installing packages
 separately" section of [sublime-enhanced](http://github.com/shagabutdinov/sublime-enhanced)
 package.
 
-If you don't like fuzzy behavior you should rebind keyboard shortcuts after
-installation in the "Autocompletion/Default (OSNAME).sublime-keymap" file
-(non-fuzzy behavior are commented by default).
-
 
 ### Commands
 
