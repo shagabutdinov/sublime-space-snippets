@@ -15,24 +15,26 @@ personal coding style so it can be worthless for others.
 
 Example:
 
-# type "myvar"
-myvar| # <- cursor is |
+```
+    # type "myvar"
+    myvar| # <- cursor is |
 
-# type "+"
-myvar+|
+    # type "+"
+    myvar+|
 
-# plugin will convert "+" to " + " (with spaces)
-myvar + |
+    # plugin will convert "+" to " + " (with spaces)
+    myvar + |
 
-# some special cases are handled too:
-# type "myvar":
-myvar| # <- cursor is |
+    # some special cases are handled too:
+    # type "myvar":
+    myvar| # <- cursor is |
 
-# than type "+"
-MyClass + |
+    # than type "+"
+    MyClass + |
 
-# than type "=" (automatically removes space between "+" and "=")
-MyClass += |
+    # than type "=" (automatically removes space between "+" and "=")
+    MyClass += |
+```
 
 
 ### Installation
