@@ -4,7 +4,7 @@ It inserts spaces instead of you where it assumed to be inserted. Requires a lot
 of adaptation.
 
 There is not much help from this plugin in writing code but when I personally
-started to used it I liked it and prefer to write code with this plugin rather
+started to use it, I liked it and prefer to write code with this plugin rather
 than without.
 
 
