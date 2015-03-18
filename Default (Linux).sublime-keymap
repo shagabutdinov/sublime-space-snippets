@@ -9,7 +9,7 @@
     },
     "context": [
       {"key": "is_search_panel_enhanced_visible", "operator": "equal", "operand": false},
-      {"key": "scope_part", "operator": "regex_contains", "operand": "source(?!.*(string|regexp|symbol|css|comment))"},
+      {"key": "scope_part", "operator": "regex_contains", "operand": "source(?!.*(string|regexp|symbol|css|comment|yaml))"},
     ]
   },
 
@@ -18,13 +18,12 @@
     "command": "insert_spaced_char",
     "args": {
       "char": ":",
-      "remove_space_before_regexp": "\\s__CURSOR__",
-      "insert_space_after_regexp": "(?<!\\:\\s)__CURSOR__(?!\\])",
+      "remove_space_before_regexp": "(?<!=)\\s__CURSOR__",
+      "insert_space_after_regexp": "(?<=\\w)__CURSOR__",
     },
     "context": [
       {"key": "is_search_panel_enhanced_visible", "operator": "equal", "operand": false},
-      {"key": "scope_part", "operator": "not_regex_contains", "operand": "source\\.js"},
-      {"key": "scope_part", "operator": "regex_contains", "operand": "source(?!.*(string|regexp|symbol|css|comment))"},
+      {"key": "scope_part", "operator": "regex_contains", "operand": "source(?!.*(string|regexp|symbol|css|comment|yaml))"},
     ]
   },
 
@@ -39,7 +38,7 @@
   //   },
   //   "context": [
   //     {"key": "is_search_panel_enhanced_visible", "operator": "equal", "operand": false},
-  //     {"key": "scope_part", "operator": "regex_contains", "operand": "source\\.go(?!.*(string|regexp|symbol|css|comment))"},
+  //     {"key": "scope_part", "operator": "regex_contains", "operand": "source\\.go(?!.*(string|regexp|symbol|css|comment|yaml))"},
   //   ]
   // },
 
@@ -55,7 +54,7 @@
     },
     "context": [
       {"key": "is_search_panel_enhanced_visible", "operator": "equal", "operand": false},
-      {"key": "scope_part", "operator": "regex_contains", "operand": "source(?!.*(string|regexp|symbol|css|comment))"},
+      {"key": "scope_part", "operator": "regex_contains", "operand": "source(?!.*(string|regexp|symbol|css|comment|yaml))"},
     ]
   },
 
@@ -71,7 +70,7 @@
     },
     "context": [
       {"key": "is_search_panel_enhanced_visible", "operator": "equal", "operand": false},
-      {"key": "scope_part", "operator": "regex_contains", "operand": "source(?!.*(string|regexp|symbol|css|comment))"},
+      {"key": "scope_part", "operator": "regex_contains", "operand": "source(?!.*(string|regexp|symbol|css|comment|yaml))"},
     ]
   },
 
@@ -87,7 +86,7 @@
     },
     "context": [
       {"key": "is_search_panel_enhanced_visible", "operator": "equal", "operand": false},
-      {"key": "scope_part", "operator": "regex_contains", "operand": "source(?!.*(string|regexp|symbol|css|comment))"},
+      {"key": "scope_part", "operator": "regex_contains", "operand": "source(?!.*(string|regexp|symbol|css|comment|yaml))"},
     ]
   },
 
@@ -103,7 +102,21 @@
     },
     "context": [
       {"key": "is_search_panel_enhanced_visible", "operator": "equal", "operand": false},
-      {"key": "scope_part", "operator": "regex_contains", "operand": "source(?!.*(string|regexp|symbol|css|comment))"},
+      {"key": "scope_part", "operator": "regex_contains", "operand": "source(?!.*(string|regexp|symbol|css|comment|yaml))"},
+    ]
+  },
+
+  {
+    "keys": ["/"],
+    "command": "insert_spaced_char",
+    "args": {
+      "char": "/",
+      "remove_space_before_regexp": "/\\s*__CURSOR__",
+      "insert_space_after_regexp": "/\\s*__CURSOR__",
+    },
+    "context": [
+      {"key": "is_search_panel_enhanced_visible", "operator": "equal", "operand": false},
+      {"key": "scope_part", "operator": "regex_contains", "operand": "source(?=.*(regexp))"},
     ]
   },
 
@@ -120,7 +133,7 @@
     "context": [
       {"key": "is_search_panel_enhanced_visible", "operator": "equal", "operand": false},
       {"key": "preceding_text", "operator": "regex_contains", "operand": "'\\s?$"},
-      {"key": "scope_part", "operator": "regex_contains", "operand": "source\\.(php|ruby)(?!.*(string|regexp|symbol|css|comment))"},
+      {"key": "scope_part", "operator": "regex_contains", "operand": "source\\.(php|ruby)(?!.*(string|regexp|symbol|css|comment|yaml))"},
     ]
   },
 
@@ -137,7 +150,7 @@
     },
     "context": [
       {"key": "is_search_panel_enhanced_visible", "operator": "equal", "operand": false},
-      {"key": "scope_part", "operator": "regex_contains", "operand": "source(?!.*(string|regexp|symbol|css|comment))"},
+      {"key": "scope_part", "operator": "regex_contains", "operand": "source(?!.*(string|regexp|symbol|css|comment|yaml))"},
     ]
   },
 
@@ -153,7 +166,7 @@
     },
     "context": [
       {"key": "is_search_panel_enhanced_visible", "operator": "equal", "operand": false},
-      {"key": "scope_part", "operator": "regex_contains", "operand": "source(?!.*(string|regexp|symbol|css|comment))"},
+      {"key": "scope_part", "operator": "regex_contains", "operand": "source(?!.*(string|regexp|symbol|css|comment|yaml))"},
     ]
   },
 
@@ -169,7 +182,7 @@
     },
     "context": [
       {"key": "is_search_panel_enhanced_visible", "operator": "equal", "operand": false},
-      {"key": "scope_part", "operator": "regex_contains", "operand": "source(?!.*(string|regexp|symbol|css|comment))"},
+      {"key": "scope_part", "operator": "regex_contains", "operand": "source(?!.*(string|regexp|symbol|css|comment|yaml))"},
     ]
   },
 
@@ -185,7 +198,7 @@
     },
     "context": [
       {"key": "is_search_panel_enhanced_visible", "operator": "equal", "operand": false},
-      {"key": "scope_part", "operator": "regex_contains", "operand": "source(?!.*(string|regexp|symbol|css|comment))"},
+      {"key": "scope_part", "operator": "regex_contains", "operand": "source(?!.*(string|regexp|symbol|css|comment|yaml))"},
       {"key": "preceding_text", "operator": "not_regex_contains", "operand": "\\{\\s*\\|[\\w,\\s]+$"},
     ]
   },
@@ -202,7 +215,7 @@
     },
     "context": [
       {"key": "is_search_panel_enhanced_visible", "operator": "equal", "operand": false},
-      {"key": "scope_part", "operator": "regex_contains", "operand": "source(?!.*(string|regexp|symbol|css|comment))"},
+      {"key": "scope_part", "operator": "regex_contains", "operand": "source(?!.*(string|regexp|symbol|css|comment|yaml))"},
     ]
   },
 
@@ -218,7 +231,7 @@
     },
     "context": [
       {"key": "is_search_panel_enhanced_visible", "operator": "equal", "operand": false},
-      {"key": "scope_part", "operator": "regex_contains", "operand": "source(?!.*(string|regexp|symbol|css|comment))"},
+      {"key": "scope_part", "operator": "regex_contains", "operand": "source(?!.*(string|regexp|symbol|css|comment|yaml))"},
     ]
   },
 
@@ -232,7 +245,7 @@
     },
     "context": [
       {"key": "is_search_panel_enhanced_visible", "operator": "equal", "operand": false},
-      {"key": "scope_part", "operator": "regex_contains", "operand": "source\\.php(?!.*(string|regexp|symbol|css|comment))"},
+      {"key": "scope_part", "operator": "regex_contains", "operand": "source\\.php(?!.*(string|regexp|symbol|css|comment|yaml))"},
       {"key": "preceding_text", "operator": "regex_contains", "operand": "\\s$"},
     ]
   },
