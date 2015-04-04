@@ -18,8 +18,8 @@
     "command": "insert_spaced_char",
     "args": {
       "char": ":",
-      "remove_space_before_regexp": "(?<!=)\\s__CURSOR__",
-      "insert_space_after_regexp": "(?<=\\w)__CURSOR__",
+      "remove_space_before_regexp": "(?<![=,])\\s__CURSOR__",
+      "insert_space_after_regexp": "(?<=a-zA-Z)__CURSOR__",
     },
     "context": [
       {"key": "is_search_panel_enhanced_visible", "operator": "equal", "operand": false},
@@ -199,7 +199,7 @@
     "context": [
       {"key": "is_search_panel_enhanced_visible", "operator": "equal", "operand": false},
       {"key": "scope_part", "operator": "regex_contains", "operand": "source(?!.*(string|regexp|symbol|css|comment|yaml))"},
-      {"key": "preceding_text", "operator": "not_regex_contains", "operand": "\\{\\s*\\|[\\w,\\s]+$"},
+      {"key": "preceding_text", "operator": "not_regex_contains", "operand": "\\{\\s*\\|[a-zA-Z,\\s]+$"},
     ]
   },
 
@@ -224,10 +224,7 @@
     "command": "insert_spaced_char",
     "args": {
       "char": "!",
-      "insert_space_before_regexp": "[^\\(\\s!,]__CURSOR__",
-      // "remove_space_before_regexp": "[:=&|*/+\\-<>]\\s*__CURSOR__",
-      // "insert_space_after_regexp": "(?<![\\(,])__CURSOR__(?!(\\s\\s|=))",
-      // "remove_space_after_regexp": "__CURSOR__\\s*[&|=*/+-]",
+      "insert_space_before_regexp": "[^\\(\\s!,a-zA-Z]__CURSOR__",
     },
     "context": [
       {"key": "is_search_panel_enhanced_visible", "operator": "equal", "operand": false},
@@ -247,6 +244,81 @@
       {"key": "is_search_panel_enhanced_visible", "operator": "equal", "operand": false},
       {"key": "scope_part", "operator": "regex_contains", "operand": "source\\.php(?!.*(string|regexp|symbol|css|comment|yaml))"},
       {"key": "preceding_text", "operator": "regex_contains", "operand": "\\s$"},
+    ]
+  },
+
+  {
+    "keys": ["backspace"],
+    "command": "goto_expression",
+    "args": {
+      "expression": "\\s*$",
+      "delete": true,
+      "options": {
+        "range": [1024, 0],
+        "backward": true,
+        "nesting": true,
+      },
+    },
+    "context": [
+      {"key": "selection_empty", "operator": "equal", "operand": true},
+      {"key": "preceding_text", "operator": "regex_contains", "operand": "\\s$"},
+      {"key": "preceding_text", "operator": "not_regex_contains", "operand": "^\\s*$"},
+    ]
+  },
+
+  {
+    "keys": ["backspace"],
+    "command": "goto_expression",
+    "args": {
+      "expression": "[ \t]*[^\\sa-zA-Z]$",
+      "delete": true,
+      "options": {
+        "range": [1024, 0],
+        "backward": true,
+        "nesting": true,
+      },
+    },
+    "context": [
+      {"key": "selection_empty", "operator": "equal", "operand": true},
+      {"key": "preceding_text", "operator": "regex_contains", "operand": "[ \t][^\\sa-zA-Z]$"},
+    ]
+  },
+
+  {
+    "keys": ["alt+/"],
+    "command": "goto_expression",
+    "args": {
+      "expression": "\\s*",
+      "delete": true,
+      "options": {
+        "range": [0, 1024],
+        "backward": false,
+        "start": "end",
+        "nesting": true,
+      },
+    },
+    "context": [
+      {"key": "selection_empty", "operator": "equal", "operand": true},
+      {"key": "following_text", "operator": "regex_contains", "operand": "^\\s"},
+    ]
+  },
+
+  {
+    "keys": ["alt+/"],
+    "command": "goto_expression",
+    "args": {
+      "expression": "^[^\\sa-zA-Z]\\s*",
+      "delete": true,
+      "options": {
+        "range": [0, 1024],
+        "start": "end",
+        "backward": false,
+        "nesting": true,
+      },
+    },
+    "context": [
+      {"key": "selection_empty", "operator": "equal", "operand": true},
+      {"key": "following_text", "operator": "regex_contains", "operand": "^[^\\sa-zA-Z]\\s"},
     ]
   },
 
