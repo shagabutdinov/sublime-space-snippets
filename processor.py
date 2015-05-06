@@ -86,7 +86,7 @@ def _set_new_symbols(state):
         new_symbols = new_symbols[0] + ' ' + new_symbols[1:]
       else:
         prefix = new_symbols[0:2]
-        if (prefix == '&&' or prefix == '&&') and len(new_symbols) > 2:
+        if prefix == '&&' and len(new_symbols) > 2:
           new_symbols = prefix + ' ' + new_symbols[2:]
 
   state['new_symbols'] = new_symbols
