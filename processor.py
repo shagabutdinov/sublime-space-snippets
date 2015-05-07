@@ -134,14 +134,14 @@ def _process_infix(state, modifications):
   no_infix = (
     state['no_spaces'] or
     state['starter'] in ['(', '{', '['] or
-    state['new_symbols'] in ['!', '!(', '?(', '<?=', ', :'] or
+    state['new_symbols'] in ['!', '!(', '?(', ', :'] or
     (state['symbols_len'] > 1 and (
       state['new_symbols'][0] == ',' or
       state['new_symbols'].endswith(':')
     )) or
     (state['symbols_len'] > 2 and state['new_symbols'].endswith('!')) or (
-      state['new_symbols'][0] == '=' and
       state['symbols_len'] != 1 and
+      state['new_symbols'][0] == '=' and
       state['new_symbols'][1] != '=' and
       state['new_symbols'][1] != '>'
     )
