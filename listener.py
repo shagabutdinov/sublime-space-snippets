@@ -12,6 +12,26 @@ def get_modifications(selection, prefix, postfix):
 
   return None
 
+class SpaceSnippetsUpdate(sublime_plugin.TextCommand):
+  def run(self, edit, modifications):
+    for modification_with_index in modifications:
+      index, modifications = modification_with_index
+      for modification in modifications:
+        point = self.view.sel()[index].a
+
+        if modification[0] == modification[1]:
+          self.view.insert(
+            edit,
+            point + modification[0],
+            modification[2]
+          )
+        else:
+          self.view.replace(
+            'replace_text',
+            sublime.Region(point + modification[0], point + modification[1]),
+            modification[2]
+          )
+
 class Listener(sublime_plugin.EventListener):
 
   def __init__(self):
@@ -46,8 +66,13 @@ class Listener(sublime_plugin.EventListener):
     self._modificating = True
 
     try:
+      modifications = []
       for index, sel in enumerate(view.sel()):
-        self._update_selection(view, index)
+        modifications.append(self._update_selection(view, index))
+
+      view.run_command('space_snippets_update', {
+        'modifications': modifications,
+      })
     finally:
       self._modificating = False
 
@@ -81,16 +106,7 @@ class Listener(sublime_plugin.EventListener):
       view.substr(sublime.Region(point, view.line(point).b))
     )
 
-    for modification in modifications:
-      point = view.sel()[index].a
+    if len(modifications) == 0:
+      return [index, []]
 
-      if modification[0] == modification[1]:
-        view.run_command('insert_text', {
-          'point': point + modification[0],
-          'text': modification[2],
-        })
-      else:
-        view.run_command('replace_text', {
-          'region': [point + modification[0], point + modification[1]],
-          'text': modification[2],
-        })
+    return [index, modifications]

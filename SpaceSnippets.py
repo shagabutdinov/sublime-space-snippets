@@ -58,7 +58,10 @@ class InsertSpacedChar(sublime_plugin.TextCommand):
       )
 
       if remove_space_after:
-        after_space_length = len(re.search(r'^(\s*)\S', following_text).group(1))
+        after_space_length =
+          len(re.search(r'^(\s*)\S', following_text).
+          group(1))
+
         sel.b += after_space_length
         offset -= after_space_length
       elif insert_space_after:

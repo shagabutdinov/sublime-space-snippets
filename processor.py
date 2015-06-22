@@ -110,7 +110,7 @@ def _process_prefix(state, modifications):
     (state['symbols'] != '|' and state['starter'] in ['(', '[', '{']) or
     (state['symbols'] == '!' and state['char'] in ['(', '[', '{']) or
     state['symbols'][0] == ',' or
-    state['new_symbols'] in [':', ';', '//', '/,']
+    state['new_symbols'] in [':', ';', '//', '/,', '><?=']
   )
 
   start = (-state['prefix_len'] - state['symbols_len'] - state['infix_len'] -
