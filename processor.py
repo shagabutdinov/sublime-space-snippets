@@ -5,7 +5,7 @@ def process(begin, end):
   if state == None:
     return []
 
-  ignored = ['$', '@', '#', '%', '.', '`', '\\']
+  ignored = ['$', '@', '#', '%', '.', '`', '\\', '*']
   if state['symbols'] in ignored:
     return []
 
@@ -63,33 +63,47 @@ def _get_state(begin, end):
 
 def _set_new_symbols(state):
   new_symbols = state['symbols']
-  if state['symbols_len'] > 1:
-    new_symbols = new_symbols.replace(' ', '')
 
-    table = {
-      ':::': ': ::',
-      '||!': '|| !',
-      '&&!': '&& !',
-      '==:': '== :',
-    }
+  if state['symbols_len'] <= 1:
+    state['new_symbols'] = new_symbols
+    return
 
-    if new_symbols in table:
-      new_symbols = table[new_symbols]
-    else:
-      insert_space = (
-        (new_symbols[0] == '=' and new_symbols not in ['==', '===', '=>']) or
-        (new_symbols[0] in [')', '}', ']'] and new_symbols[1] != ',') or
-        new_symbols[0] == ','
-      )
-
-      if insert_space:
-        new_symbols = new_symbols[0] + ' ' + new_symbols[1:]
-      else:
-        prefix = new_symbols[0:2]
-        if prefix == '&&' and len(new_symbols) > 2:
-          new_symbols = prefix + ' ' + new_symbols[2:]
-
+  new_symbols = new_symbols.replace(' ', '')
   state['new_symbols'] = new_symbols
+
+  table = {
+    ':::': ': ::',
+    '==:': '== :',
+  }
+
+  if new_symbols in table:
+    state['new_symbols'] = table[new_symbols]
+    return
+
+  insert_space_before_last_char = (
+    new_symbols[0] in ['=', '<', '>', '!'] and
+    new_symbols[len(new_symbols) - 1] == '-'
+  )
+
+  if insert_space_before_last_char:
+    state['new_symbols'] = (new_symbols[0:len(new_symbols) - 1] + ' ' +
+      new_symbols[len(new_symbols) - 1])
+    return
+
+  insert_space_after_last_char = (
+    (new_symbols[0] == '=' and new_symbols not in ['==', '===', '=>']) or
+    (new_symbols[0] in [')', '}', ']'] and new_symbols[1] != ',') or
+    new_symbols[0] == ','
+  )
+
+  if insert_space_after_last_char:
+    state['new_symbols'] = new_symbols[0] + ' ' + new_symbols[1:]
+    return
+
+  prefix = new_symbols[0:2]
+  if prefix in ['&&', '||'] and len(new_symbols) > 2:
+    state['new_symbols'] = prefix + ' ' + new_symbols[2:]
+    return
 
 def _set_no_spaces(state):
   state['no_spaces'] = (
@@ -108,10 +122,20 @@ def _process_prefix(state, modifications):
     state['no_spaces'] or
     state['new_symbols'][0:2] in ['<?'] or
     (state['symbols'] != '|' and state['starter'] in ['(', '[', '{']) or
-    (state['symbols'] == '!' and state['char'] in ['(', '[', '{']) or
+    (state['symbols'] == '!' and (
+      (
+         state['char'] in ['(', '[', '{'] or
+         state['starter'] == ''
+      ) and
+      re.search('(\W|^)(if|while|unless)', state['begin']) == None
+    )) or
     state['symbols'][0] == ',' or
-    state['new_symbols'] in [':', ';', '//', '/,', '><?=']
+    state['new_symbols'] in [';', '//', '/,', '><?='] or
+    (state['new_symbols'] == ':' and re.search(r'^\s*attr_(reader|writer|' +
+      r'accessor)', state['begin']) == None)
   )
+
+  state['no_prefix'] = no_prefix
 
   start = (-state['prefix_len'] - state['symbols_len'] - state['infix_len'] -
     state['char_len'])
@@ -131,19 +155,30 @@ def _process_symbols(state, modifications):
       state['new_symbols']))
 
 def _process_infix(state, modifications):
+  symbols = state['new_symbols']
+  symbols_len = state['symbols_len']
+
   no_infix = (
     state['no_spaces'] or
     state['starter'] in ['(', '{', '['] or
-    state['new_symbols'] in ['!', '!(', '?(', ', :'] or
-    (state['symbols_len'] > 1 and (
-      state['new_symbols'][0] == ',' or
-      state['new_symbols'].endswith(':')
-    )) or
-    (state['symbols_len'] > 2 and state['new_symbols'].endswith('!')) or (
-      state['symbols_len'] != 1 and
-      state['new_symbols'][0] == '=' and
-      state['new_symbols'][1] != '=' and
-      state['new_symbols'][1] != '>'
+    symbols in ['!', '!(', '?(', ', :'] or
+    (symbols == ':' and 'no_prefix' in state and state['no_prefix'] == False) or
+
+    (
+      symbols_len > 1 and (
+        symbols[0] == '=' and
+        symbols[1] != '=' and
+        symbols[1] != '>' or
+        symbols[0] == ',' or
+        symbols.endswith(':') or
+        symbols.endswith('-')
+      )
+    ) or
+
+    (
+      symbols_len > 2 and (
+        symbols.endswith('!')
+      )
     )
   )
 

@@ -15,6 +15,9 @@ def get_modifications(selection, prefix, postfix):
 class SpaceSnippetsUpdate(sublime_plugin.TextCommand):
   def run(self, edit, modifications):
     for modification_with_index in modifications:
+      if modification_with_index == None:
+        continue
+
       index, modifications = modification_with_index
       for modification in modifications:
         point = self.view.sel()[index].a
@@ -27,7 +30,7 @@ class SpaceSnippetsUpdate(sublime_plugin.TextCommand):
           )
         else:
           self.view.replace(
-            'replace_text',
+            edit,
             sublime.Region(point + modification[0], point + modification[1]),
             modification[2]
           )

@@ -19,7 +19,7 @@ class ProcessTest(unittest.TestCase):
 
     self._space_symbols = [
       '= !', '= &', '= *', '= -', '= +', '= ^',
-      ', &', ', *', '= :',
+      ', &', ', *', '= :', '&& !', '&& -', '|| !', '|| -'
     ]
 
     self._no_space_before = [
@@ -31,7 +31,7 @@ class ProcessTest(unittest.TestCase):
       '+', '-', '*', '/', '|', '&', '=',
       '||', '&&', '**', '==', '===',
       '*=', '+=', '-=', '/=', '&=', '|=', '^=', '=>',
-      '= -', '= +', '!',
+      '= -', '= +', '=== -',
     ]
 
     self._no_space_after = [
@@ -74,6 +74,18 @@ class ProcessTest(unittest.TestCase):
       ('and + =', '', [(-3, 0, '+='), (0, 0, ' ')]),
       ('and + =', ' ', [(-3, 0, '+='), (0, 0, ' '), (0, 1, '')]),
       ('test(!', '', []),
+      ('!test', '', []),
+      ('test!', '', []),
+      ('if !', '', []),
+      ('  attr_reader :', '', []),
+      ('attr_reader :t', '', []),
+      ('!==-1', '', [(-5, -1, '!== -')]),
+      ('!== -1', '', []),
+      ('==-1', '', [(-4, -1, '== -')]),
+      ('== -1', '', []),
+      ('===-1', '', [(-5, -1, '=== -')]),
+      ('=== -1', '', []),
+      ('> -1', '', []),
     ]
 
     super().__init__(*args)
@@ -195,7 +207,8 @@ class ProcessTest(unittest.TestCase):
 
   def test_process_extra_cases(self):
     for value in self._extra_cases:
-      self.assertEqual(value[2], process(value[0], value[1]))
+      self.assertEqual(value[2], process(value[0], value[1]), 'token: "' +
+        value[0] + value[1] + '"')
 
 if __name__ == '__main__':
   unittest.main()
