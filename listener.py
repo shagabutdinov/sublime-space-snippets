@@ -124,7 +124,7 @@ class Listener(sublime_plugin.EventListener):
       view.substr(sublime.Region(point, view.line(point).b)),
       scope_right,
     )
-    print(modifications)
+
     if len(modifications) == 0:
       return [index, []]
 
