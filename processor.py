@@ -1,12 +1,12 @@
 import re
 
-def process(begin, end):
-  state = _get_state(begin, end)
+def process(begin, end, scope = ''):
+  state = _get_state(begin, end, scope)
   if state == None:
     return []
 
-  ignored = ['$', '@', '#', '%', '.', '`', '\\', '*']
-  if state['symbols'] in ignored:
+  # some symbols are ignored
+  if state['symbols'] in ['$', '@', '#', '%', '.', '`', '\\']:
     return []
 
   modifications = []
@@ -17,10 +17,12 @@ def process(begin, end):
   _process_symbols(state, modifications)
   _process_infix(state, modifications)
   _process_postfix(state, modifications)
+  _process_offset(state, modifications)
 
   return modifications
 
-def _get_state(begin, end):
+def _get_state(begin, end, scope):
+
   fullline = begin + '~~CURSOR~~' + end
 
   expr = (
@@ -29,14 +31,11 @@ def _get_state(begin, end):
     r'([^\w\$\'\"\`$@#%\.\(\)\{\}\[\]\\]+)' +
     r'(?<!\s)(\s*)'+
     r'([\w\(\)\{\}\[\]]?)~~CURSOR~~' +
+    r'([^\w\$\'\"\`$@#%\.\(\)\{\}\[\]\\]*)'
     r'(\s*)'
   )
 
-  match = re.search(
-    expr,
-    fullline
-  )
-
+  match = re.search(expr, fullline)
   if match == None:
     return None
 
@@ -55,9 +54,23 @@ def _get_state(begin, end):
     'infix_len': len(match.group(4)),
     'char': match.group(5),
     'char_len': len(match.group(5)),
-    'postfix': match.group(6),
-    'postfix_len': len(match.group(6)),
+    'infix_tail': match.group(6),
+    'infix_tail_len': len(match.group(6)),
+    'postfix': match.group(7),
+    'postfix_len': len(match.group(7)),
+    'scop': scope,
+    'language_references': 'source.go' in scope,
+    'offset': 0,
   }
+
+  if state['infix_tail'] != '':
+    if state['infix'] == '' and state['char'] == '' and state['infix_tail'].strip() != '':
+      state['symbols'] += state['infix_tail']
+      state['symbols_len'] += state['infix_tail_len']
+      state['offset'] = state['infix_tail_len']
+    else:
+      state['postfix'] += state['infix_tail']
+      state['postfix_len'] += state['infix_tail_len']
 
   return state
 
@@ -69,41 +82,65 @@ def _set_new_symbols(state):
     return
 
   new_symbols = new_symbols.replace(' ', '')
-  state['new_symbols'] = new_symbols
+  expression = [
+    r':(?=(?:&|::))',
+    r'[/]?,',
+    r'[!<>+*/&|^-]?=+[<>]?',
+    r'&&',
+    r'\|\|',
+    r'-?>',
+    r'-?<[-?]?',
+  ]
 
-  table = {
-    ':::': ': ::',
-    '==:': '== :',
-  }
+  parts = re.split('(' + '|'.join(expression) +')', new_symbols)
+  parts = filter(None, parts)
+  state['new_symbols'] = ' '.join(parts).strip()
+  # state['new_symbols'] = re.sub(r'\s{2,}', ' ', state['new_symbols'])
+  state['new_symbols_len'] = len(state['new_symbols'])
 
-  if new_symbols in table:
-    state['new_symbols'] = table[new_symbols]
-    return
+  # state['new_symbols'] = new_symbols
 
-  insert_space_before_last_char = (
-    new_symbols[0] in ['=', '<', '>', '!'] and
-    new_symbols[len(new_symbols) - 1] == '-'
-  )
+  # table = {
+  #   ':::': ': ::',
+  #   ':&': ': &',
+  #   '==:': '== :',
+  #   '=!': '= !',
+  # }
 
-  if insert_space_before_last_char:
-    state['new_symbols'] = (new_symbols[0:len(new_symbols) - 1] + ' ' +
-      new_symbols[len(new_symbols) - 1])
-    return
+  # if new_symbols in table:
+  #   state['new_symbols'] = table[new_symbols]
+  #   return
 
-  insert_space_after_last_char = (
-    (new_symbols[0] == '=' and new_symbols not in ['==', '===', '=>']) or
-    (new_symbols[0] in [')', '}', ']'] and new_symbols[1] != ',') or
-    new_symbols[0] == ','
-  )
+  # insert_space_before_last_char = (
+  #   (
+  #      new_symbols.endswith('-') and
+  #        new_symbols[len(new_symbols) - 2] not in ['-', '<']
+  #   ) or
+  #   (
+  #      new_symbols[len(new_symbols) - 1] in [','] and
+  #        new_symbols[0:len(new_symbols) - 1] in ['==', '!=', '===', '!==']
+  #   )
+  # )
 
-  if insert_space_after_last_char:
-    state['new_symbols'] = new_symbols[0] + ' ' + new_symbols[1:]
-    return
+  # if insert_space_before_last_char:
+  #   state['new_symbols'] = (new_symbols[0:len(new_symbols) - 1] + ' ' +
+  #     new_symbols[len(new_symbols) - 1])
+  #   return
 
-  prefix = new_symbols[0:2]
-  if prefix in ['&&', '||'] and len(new_symbols) > 2:
-    state['new_symbols'] = prefix + ' ' + new_symbols[2:]
-    return
+  # insert_space_after_last_char = (
+  #   (new_symbols[0] == '=' and new_symbols not in ['==', '===', '=>']) or
+  #   (new_symbols[0] in [')', '}', ']'] and new_symbols[1] != ',') or
+  #   new_symbols[0] == ','
+  # )
+
+  # if insert_space_after_last_char:
+  #   state['new_symbols'] = new_symbols[0] + ' ' + new_symbols[1:]
+  #   return
+
+  # prefix = new_symbols[0:2]
+  # if prefix in ['&&', '||'] and len(new_symbols) > 2:
+  #   state['new_symbols'] = prefix + ' ' + new_symbols[2:]
+  #   return
 
 def _set_no_spaces(state):
   state['no_spaces'] = (
@@ -118,9 +155,16 @@ def _process_prefix(state, modifications):
   if state['start'] == 0:
     return
 
+  symbols = state['new_symbols']
+
+  # ignore star due to it is very hard to predict whether it reference
+  # operation or multiplication
+  if state['language_references'] and symbols == '*':
+    return
+
   no_prefix = (
     state['no_spaces'] or
-    state['new_symbols'][0:2] in ['<?'] or
+    symbols[0:2] in ['<?'] or
     (state['symbols'] != '|' and state['starter'] in ['(', '[', '{']) or
     (state['symbols'] == '!' and (
       (
@@ -130,16 +174,19 @@ def _process_prefix(state, modifications):
       re.search('(\W|^)(if|while|unless)', state['begin']) == None
     )) or
     state['symbols'][0] == ',' or
-    state['new_symbols'] in [';', '//', '/,', '><?='] or
-    (state['new_symbols'] == ':' and re.search(r'^\s*attr_(reader|writer|' +
+    # (state['symbols'][0] == ':' and state['symbols'] != '::') or
+    symbols in [';', '//', '/,', '><?='] or
+    (symbols == ':' and re.search(r'^\s*attr_(reader|writer|' +
       r'accessor)', state['begin']) == None)
   )
+
+  if state['language_references'] and symbols == '->':
+    no_prefix = False
 
   state['no_prefix'] = no_prefix
 
   start = (-state['prefix_len'] - state['symbols_len'] - state['infix_len'] -
     state['char_len'])
-
   if no_prefix:
     if state['prefix'] != '':
       modifications.append((start, start + state['prefix_len'], ''))
@@ -156,16 +203,24 @@ def _process_symbols(state, modifications):
 
 def _process_infix(state, modifications):
   symbols = state['new_symbols']
+
+  # ignore star due to it is very hard to predict whether it reference
+  # operation or multiplication
+  if state['language_references'] and symbols == '*':
+    return
+
   symbols_len = state['symbols_len']
 
   no_infix = (
+    symbols == ": &" or
     state['no_spaces'] or
     state['starter'] in ['(', '{', '['] or
     symbols in ['!', '!(', '?(', ', :'] or
     (symbols == ':' and 'no_prefix' in state and state['no_prefix'] == False) or
 
     (
-      symbols_len > 1 and (
+      symbols_len > 1 and
+      symbols != '<-' and (
         symbols[0] == '=' and
         symbols[1] != '=' and
         symbols[1] != '>' or
@@ -182,6 +237,9 @@ def _process_infix(state, modifications):
     )
   )
 
+  if state['language_references'] and symbols == '->':
+    no_infix = False
+
   start = -state['infix_len'] - state['char_len']
 
   if no_infix:
@@ -193,6 +251,21 @@ def _process_infix(state, modifications):
     modifications.append((start, start + state['infix_len'], ' '))
 
 def _process_postfix(state, modifications):
-  if state['char'] == '':
-    if state['postfix'] != '':
-      modifications.append((0, state['postfix_len'], ''))
+  if state['char'] == '' and state['postfix'] != '':
+    modifications.append((0, state['postfix_len'], ''))
+
+def _process_offset(state, modifications):
+  if state['offset'] == 0:
+    return
+
+  offset = 0
+  for index, modification in enumerate(modifications):
+    modifications[index] = (
+      modification[0] + state['offset'] + offset,
+      modification[1] + state['offset'] + offset,
+      modification[2],
+    )
+
+    modification = modifications[index]
+    if modification[0] < 0 and modification[1] > 0:
+      offset = len(modification[2]) - (modification[1] - modification[0])

@@ -14,38 +14,42 @@ class ProcessTest(unittest.TestCase):
 
     self._no_space_symbols = [
       '==', '!=', '===', '&&', '||', '**', '++', '--', '//',
-      '+=', '-=', '*=', '/=', '&=', '|=', '^=', '=>',
+      '+=', '-=', '*=', '/=', '&=', '|=', '^=', '=>', '<-',
+      '->', '>=', '<=',
     ]
 
     self._space_symbols = [
       '= !', '= &', '= *', '= -', '= +', '= ^',
-      ', &', ', *', '= :', '&& !', '&& -', '|| !', '|| -'
+      ', &', ', *', '= :', '&& !', '&& -', '|| !', '|| -',
+      ': &', '=== ,'
     ]
 
     self._no_space_before = [
       ',', ':', '?', ';',
       '::', '++', '--', '//', '<?',
+      '->',
     ]
 
     self._space_before = [
       '+', '-', '*', '/', '|', '&', '=',
       '||', '&&', '**', '==', '===',
       '*=', '+=', '-=', '/=', '&=', '|=', '^=', '=>',
-      '= -', '= +', '=== -',
+      '= -', '= +', '=== -', ': &',
     ]
 
     self._no_space_after = [
       '?', '!',
       '::', '++', '--',
-      '(-', '(*', '(+', '(&',
+      '(-', '(*', ', *', ', &', ': &', '(+', '(&',
       '= -', '= +',
     ]
 
     self._space_after = [
-      ',', '+', '-', '*', '/', ':', '=',
+      ',', '+', '-', '/', ':', '=', '<', '>',
       '||', '&&', '**',
       '*=', '+=', '-=', '/=', '^=', '&=', '|=', '==', '===', '!=', '=>',
       '),', '],', '},', '//',
+      '<-',
     ]
 
     self._extra_cases = [
@@ -82,10 +86,23 @@ class ProcessTest(unittest.TestCase):
       ('!==-1', '', [(-5, -1, '!== -')]),
       ('!== -1', '', []),
       ('==-1', '', [(-4, -1, '== -')]),
+      ('=-1', '', [(-3, -1, '= -')]),
       ('== -1', '', []),
       ('===-1', '', [(-5, -1, '=== -')]),
       ('=== -1', '', []),
       ('> -1', '', []),
+      ('test !', '=', [(1, 1, ' ')]),
+      ('=', '>', [(1, 1, ' ')]),
+      ('<0', ':', [(-1, -1, ' ')]),
+      ('test +', '= test', [(-1, 2, '+='), (1, 1, ' ')]),
+      ('test !==', ', test', [(-3, 2, '!== ,'), (2, 2, ' ')]),
+      ('test ==', ', test', [(-2, 2, '== ,'), (2, 2, ' ')]),
+    ]
+
+    self._language_cases = [
+      ('test -> t', '', 'source.go', []),
+      ('test *T', '', 'source.go', []),
+      ('test* T', '', 'source.go', []),
     ]
 
     super().__init__(*args)
@@ -172,7 +189,7 @@ class ProcessTest(unittest.TestCase):
 
   def test_process_space_after_inserts_space_after_symbol_before_char(self):
     for symbol in self._space_after:
-      self.assertIn((-1, -1, ' '), process('test' + symbol + 'A', ''))
+      self.assertIn((-1, -1, ' '), process('test' + symbol + 'a', ''))
 
   def test_process_space_after_replaces_spaces_after_symbol_after_cursor(self):
     for symbol in self._space_after:
@@ -180,7 +197,7 @@ class ProcessTest(unittest.TestCase):
 
   def test_process_space_after_not_replaces_spaces_after_symbol_with_char(self):
     for symbol in self._space_after:
-      self.assertNotIn((0, 2, ''), process('test' + symbol + ' A', '  '))
+      self.assertNotIn((0, 2, ''), process('test' + symbol + ' a', '  '))
 
   # no_space_after
 
@@ -209,6 +226,11 @@ class ProcessTest(unittest.TestCase):
     for value in self._extra_cases:
       self.assertEqual(value[2], process(value[0], value[1]), 'token: "' +
         value[0] + value[1] + '"')
+
+  def test_process_language_cases(self):
+    for value in self._language_cases:
+      self.assertEqual(value[3], process(value[0], value[1], value[2]),
+        'token: "' + value[0] + value[1] + '"')
 
 if __name__ == '__main__':
   unittest.main()

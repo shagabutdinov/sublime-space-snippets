@@ -22,6 +22,7 @@ class SpaceSnippetsUpdate(sublime_plugin.TextCommand):
       for modification in modifications:
         point = self.view.sel()[index].a
 
+
         if modification[0] == modification[1]:
           self.view.insert(
             edit,
@@ -29,11 +30,25 @@ class SpaceSnippetsUpdate(sublime_plugin.TextCommand):
             modification[2]
           )
         else:
-          self.view.replace(
-            edit,
-            sublime.Region(point + modification[0], point + modification[1]),
-            modification[2]
-          )
+          if modification[0] < 0 and modification[1] > 0:
+            self.view.replace(
+              edit,
+              sublime.Region(point + modification[0], point),
+              modification[2][0 : -modification[0]]
+            )
+
+            self.view.replace(
+              edit,
+              sublime.Region(point, point + modification[1]),
+              modification[2][-modification[0] :]
+            )
+
+          else:
+            self.view.replace(
+              edit,
+              sublime.Region(point + modification[0], point + modification[1]),
+              modification[2]
+            )
 
 class Listener(sublime_plugin.EventListener):
 
@@ -106,9 +121,10 @@ class Listener(sublime_plugin.EventListener):
     point = sel.a
     modifications = process(
       view.substr(sublime.Region(view.line(point).a, point)),
-      view.substr(sublime.Region(point, view.line(point).b))
+      view.substr(sublime.Region(point, view.line(point).b)),
+      scope_right,
     )
-
+    print(modifications)
     if len(modifications) == 0:
       return [index, []]
 
