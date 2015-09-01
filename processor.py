@@ -83,7 +83,7 @@ def _set_new_symbols(state):
 
   new_symbols = new_symbols.replace(' ', '')
   expression = [
-    r':(?=(?:&|::))',
+    r':(?:(?=(?:&|::))|=)',
     r'[/]?,',
     r'[!<>+*/&|^-]?=+[<>]?',
     r'&&',
@@ -236,6 +236,10 @@ def _process_infix(state, modifications):
       )
     )
   )
+
+  if symbols.endswith('<-'):
+    no_infix = False
+
 
   if state['language_references'] and symbols == '->':
     no_infix = False
