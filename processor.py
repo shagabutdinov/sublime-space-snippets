@@ -6,13 +6,17 @@ def process(begin, end, scope = ''):
     return []
 
   # some symbols are ignored
-  if state['symbols'] in ['$', '@', '#', '%', '.', '`', '\\']:
+  if state['symbols'] in ['$', '@', '#', '`', '\\']:
+    return []
+
+  if'source.ruby' in state['scope'] and re.search(':\w*$', begin):
     return []
 
   modifications = []
 
   _set_new_symbols(state)
   _set_no_spaces(state)
+
   _process_prefix(state, modifications)
   _process_symbols(state, modifications)
   _process_infix(state, modifications)
@@ -22,16 +26,15 @@ def process(begin, end, scope = ''):
   return modifications
 
 def _get_state(begin, end, scope):
-
   fullline = begin + '~~CURSOR~~' + end
 
   expr = (
-    r'([\(\)\{\}\[\]\.]?)' +
+    r'([\(\)\{\}\[\]]?)' +
     r'(?<!\s)(\s*)' +
-    r'([^\w\$\'\"\`$@#%\.\(\)\{\}\[\]\\]+)' +
+    r'([^\w\$\'\"\`$@#\(\)\{\}\[\]\\]+)' +
     r'(?<!\s)(\s*)'+
     r'([\w\(\)\{\}\[\]]?)~~CURSOR~~' +
-    r'([^\w\$\'\"\`$@#%\.\(\)\{\}\[\]\\]*)'
+    r'([^\w\$\'\"\`$@#%\(\)\{\}\[\]\\]*)'
     r'(\s*)'
   )
 
@@ -58,7 +61,7 @@ def _get_state(begin, end, scope):
     'infix_tail_len': len(match.group(6)),
     'postfix': match.group(7),
     'postfix_len': len(match.group(7)),
-    'scop': scope,
+    'scope': scope,
     'language_references': 'source.go' in scope,
     'offset': 0,
   }
@@ -76,7 +79,6 @@ def _get_state(begin, end, scope):
 
 def _set_new_symbols(state):
   new_symbols = state['symbols']
-
   if state['symbols_len'] <= 1:
     state['new_symbols'] = new_symbols
     return
@@ -87,6 +89,9 @@ def _set_new_symbols(state):
     r'[/]?,',
     r'[!<>+*/&|^-]?=+[<>]?',
     r'&&',
+    r'<%=?',
+    r'%>',
+    r'\.=',
     r'\|\|',
     r'-?>',
     r'-?<[-?]?',
@@ -164,7 +169,7 @@ def _process_prefix(state, modifications):
 
   no_prefix = (
     state['no_spaces'] or
-    symbols[0:2] in ['<?'] or
+    symbols[0:2] in ['<?', '..'] or
     (state['symbols'] != '|' and state['starter'] in ['(', '[', '{']) or
     (state['symbols'] == '!' and (
       (
@@ -176,6 +181,7 @@ def _process_prefix(state, modifications):
     state['symbols'][0] == ',' or
     # (state['symbols'][0] == ':' and state['symbols'] != '::') or
     symbols in [';', '//', '/,', '><?='] or
+    symbols.startswith('.') or
     (symbols == ':' and re.search(r'^\s*attr_(reader|writer|' +
       r'accessor)', state['begin']) == None)
   )
@@ -187,6 +193,16 @@ def _process_prefix(state, modifications):
 
   start = (-state['prefix_len'] - state['symbols_len'] - state['infix_len'] -
     state['char_len'])
+
+  ruby_case = (
+    'source.ruby' in state['scope'] and
+    re.search(r'(do|\{)\s*\|[\w\s(),*]*\|\s*$', state['begin']) != None
+  )
+
+  if ruby_case:
+    no_prefix = True
+
+
   if no_prefix:
     if state['prefix'] != '':
       modifications.append((start, start + state['prefix_len'], ''))
@@ -234,12 +250,13 @@ def _process_infix(state, modifications):
       symbols_len > 2 and (
         symbols.endswith('!')
       )
-    )
+    ) or
+
+    symbols.endswith('.')
   )
 
   if symbols.endswith('<-'):
     no_infix = False
-
 
   if state['language_references'] and symbols == '->':
     no_infix = False
@@ -249,6 +266,14 @@ def _process_infix(state, modifications):
   if no_infix:
     if state['infix'] != '':
       modifications.append((start, start + state['infix_len'], ''))
+    return
+
+  ignore_ruby = (
+    'source.ruby' in state['scope'] and
+    re.search(r'(do|\{).*?\|\s*$', state['begin'])
+  )
+
+  if ignore_ruby:
     return
 
   if state['infix'] != ' ':
