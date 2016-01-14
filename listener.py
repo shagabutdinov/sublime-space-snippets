@@ -22,7 +22,6 @@ class SpaceSnippetsUpdate(sublime_plugin.TextCommand):
       for modification in modifications:
         point = self.view.sel()[index].a
 
-
         if modification[0] == modification[1]:
           self.view.insert(
             edit,

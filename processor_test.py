@@ -9,13 +9,13 @@ class ProcessTest(unittest.TestCase):
 
   def __init__(self, *args):
     self._ignored_symbols = [
-      '$', '@', '#', '%',
+      '$', '@', '#',
     ]
 
     self._no_space_symbols = [
       '==', '!=', '===', '&&', '||', '**', '++', '--', '//',
       '+=', '-=', '*=', '/=', '&=', '|=', '^=', '=>', '<-',
-      '->', '>=', '<=', ':=',
+      '->', '>=', '<=', ':=', '<%', '<%=', '<%-', '%>',
     ]
 
     self._space_symbols = [
@@ -118,7 +118,6 @@ class ProcessTest(unittest.TestCase):
 
   def test_process_no_space_symbols_removes_space(self):
     for symbols in self._no_space_symbols:
-      print('test ' + symbols[0] + ' ' + symbols[1:], '')
       actual = process('test ' + symbols[0] + ' ' + symbols[1:], '')
       self.assertIn((-1 - len(symbols), 0, symbols), actual)
 

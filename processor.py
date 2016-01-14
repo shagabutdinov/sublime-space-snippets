@@ -6,7 +6,7 @@ def process(begin, end, scope = ''):
     return []
 
   # some symbols are ignored
-  if state['symbols'] in ['$', '@', '#', '%', '.', '`', '\\']:
+  if state['symbols'] in ['$', '@', '#', '.', '`', '\\']:
     return []
 
   modifications = []
@@ -28,7 +28,7 @@ def _get_state(begin, end, scope):
   expr = (
     r'([\(\)\{\}\[\]\.]?)' +
     r'(?<!\s)(\s*)' +
-    r'([^\w\$\'\"\`$@#%\.\(\)\{\}\[\]\\]+)' +
+    r'([^\w\$\'\"\`$@#\.\(\)\{\}\[\]\\]+)' +
     r'(?<!\s)(\s*)'+
     r'([\w\(\)\{\}\[\]]?)~~CURSOR~~' +
     r'([^\w\$\'\"\`$@#%\.\(\)\{\}\[\]\\]*)'
@@ -88,8 +88,8 @@ def _set_new_symbols(state):
     r'[!<>+*/&|^-]?=+[<>]?',
     r'&&',
     r'\|\|',
-    r'-?>',
-    r'-?<[-?]?',
+    r'[-%]?>',
+    r'-?<[-?%]?[=-]?',
   ]
 
   parts = re.split('(' + '|'.join(expression) +')', new_symbols)
@@ -97,6 +97,7 @@ def _set_new_symbols(state):
   state['new_symbols'] = ' '.join(parts).strip()
   # state['new_symbols'] = re.sub(r'\s{2,}', ' ', state['new_symbols'])
   state['new_symbols_len'] = len(state['new_symbols'])
+
 
   # state['new_symbols'] = new_symbols
 
