@@ -16,6 +16,7 @@ class ProcessTest(unittest.TestCase):
       '==', '!=', '===', '&&', '||', '**', '++', '--', '//',
       '+=', '-=', '*=', '/=', '&=', '|=', '^=', '=>', '<-',
       '->', '>=', '<=', ':=', '<%', '<%=', '<%-', '%>',
+      '->', '>=', '<=', ':=', '.=', '<%=', '<%', '<%-', '%>',
     ]
 
     self._space_symbols = [
@@ -100,9 +101,12 @@ class ProcessTest(unittest.TestCase):
     ]
 
     self._language_cases = [
-      ('test -> t', '', 'source.go', []),
-      ('test *T', '', 'source.go', []),
-      ('test* T', '', 'source.go', []),
+      # ('test -> t', '', 'source.go', []),
+      # ('test *T', '', 'source.go', []),
+      # ('test* T', '', 'source.go', []),
+      ('do|', 'var', 'source.ruby', [(-1, -1, ' ')]),
+      ('do |', 'var', 'source.ruby', []),
+      ('do |test|', '', 'source.ruby', [])
     ]
 
     super().__init__(*args)
