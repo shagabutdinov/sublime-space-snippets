@@ -63,6 +63,8 @@ def _get_state(begin, end, scope):
     'postfix_len': len(match.group(7)),
     'scope': scope,
     'language_references': 'source.go' in scope,
+    'no_arrow_spaces': 'source.go' in scope or 'source.coffee' in scope,
+    'dot_as_operator': 'source.php' in scope in scope,
     'offset': 0,
   }
 
@@ -100,52 +102,7 @@ def _set_new_symbols(state):
   parts = re.split('(' + '|'.join(expression) +')', new_symbols)
   parts = filter(None, parts)
   state['new_symbols'] = ' '.join(parts).strip()
-  # state['new_symbols'] = re.sub(r'\s{2,}', ' ', state['new_symbols'])
   state['new_symbols_len'] = len(state['new_symbols'])
-
-  # state['new_symbols'] = new_symbols
-
-  # table = {
-  #   ':::': ': ::',
-  #   ':&': ': &',
-  #   '==:': '== :',
-  #   '=!': '= !',
-  # }
-
-  # if new_symbols in table:
-  #   state['new_symbols'] = table[new_symbols]
-  #   return
-
-  # insert_space_before_last_char = (
-  #   (
-  #      new_symbols.endswith('-') and
-  #        new_symbols[len(new_symbols) - 2] not in ['-', '<']
-  #   ) or
-  #   (
-  #      new_symbols[len(new_symbols) - 1] in [','] and
-  #        new_symbols[0:len(new_symbols) - 1] in ['==', '!=', '===', '!==']
-  #   )
-  # )
-
-  # if insert_space_before_last_char:
-  #   state['new_symbols'] = (new_symbols[0:len(new_symbols) - 1] + ' ' +
-  #     new_symbols[len(new_symbols) - 1])
-  #   return
-
-  # insert_space_after_last_char = (
-  #   (new_symbols[0] == '=' and new_symbols not in ['==', '===', '=>']) or
-  #   (new_symbols[0] in [')', '}', ']'] and new_symbols[1] != ',') or
-  #   new_symbols[0] == ','
-  # )
-
-  # if insert_space_after_last_char:
-  #   state['new_symbols'] = new_symbols[0] + ' ' + new_symbols[1:]
-  #   return
-
-  # prefix = new_symbols[0:2]
-  # if prefix in ['&&', '||'] and len(new_symbols) > 2:
-  #   state['new_symbols'] = prefix + ' ' + new_symbols[2:]
-  #   return
 
 def _set_no_spaces(state):
   state['no_spaces'] = (
@@ -181,12 +138,12 @@ def _process_prefix(state, modifications):
     state['symbols'][0] == ',' or
     # (state['symbols'][0] == ':' and state['symbols'] != '::') or
     symbols in [';', '//', '/,', '><?='] or
-    symbols.startswith('.') or
+    (symbols.startswith('.') and symbols != '.=') or
     (symbols == ':' and re.search(r'^\s*attr_(reader|writer|' +
       r'accessor)', state['begin']) == None)
   )
 
-  if state['language_references'] and symbols == '->':
+  if state['no_arrow_spaces'] and symbols == '->':
     no_prefix = False
 
   state['no_prefix'] = no_prefix
@@ -202,6 +159,9 @@ def _process_prefix(state, modifications):
   if ruby_case:
     no_prefix = True
 
+  if no_prefix:
+    if state['dot_as_operator'] and state['symbols'] == '.':
+      no_prefix = False
 
   if no_prefix:
     if state['prefix'] != '':
@@ -262,6 +222,11 @@ def _process_infix(state, modifications):
     no_infix = False
 
   start = -state['infix_len'] - state['char_len']
+
+  if no_infix:
+    if state['dot_as_operator'] and state['symbols'] == '.':
+      no_infix = False
+
 
   if no_infix:
     if state['infix'] != '':
