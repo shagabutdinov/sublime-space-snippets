@@ -101,8 +101,8 @@ class Listener(sublime_plugin.EventListener):
     scope_left = view.scope_name(sel.a - 1)
     scope_right = view.scope_name(sel.a)
 
-    expr1 = r'source(?!.*(comment|string|css|yaml))'
-    expr2 = r'^text.html(?!.*source)'
+    expr1 = r'source(?!.*(comment|string|css|yaml|makefile|shell))'
+    expr2 = r'^text(?!.*source.php)'
 
     ignore = (
       (

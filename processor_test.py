@@ -26,9 +26,8 @@ class ProcessTest(unittest.TestCase):
     ]
 
     self._no_space_before = [
-      ',', ':', '?', ';',
-      '::', '++', '--', '//', '<?',
-      '->',
+      ',', ':', ';',
+      '::', '++', '--', '//', '->',
     ]
 
     self._space_before = [
@@ -39,7 +38,7 @@ class ProcessTest(unittest.TestCase):
     ]
 
     self._no_space_after = [
-      '?', '!',
+      '!',
       '::', '++', '--',
       '(-', '(*', ', *', ', &', ': &', '(+', '(&',
       '= -', '= +',

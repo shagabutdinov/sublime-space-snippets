@@ -6,7 +6,7 @@ def process(begin, end, scope = ''):
     return []
 
   # some symbols are ignored
-  if state['symbols'] in ['$', '@', '#', '`', '\\']:
+  if state['symbols'] in ['$', '@', '#', '`', '\\', '?']:
     return []
 
   if'source.ruby' in state['scope'] and re.search(':\w*$', begin):
@@ -31,10 +31,10 @@ def _get_state(begin, end, scope):
   expr = (
     r'([\(\)\{\}\[\]]?)' +
     r'(?<!\s)(\s*)' +
-    r'([^\w\$\'\"\`$@#\(\)\{\}\[\]\\]+)' +
+    r'([^\w\$\'\"\`$@#\(\)\{\}\[\]\\\?]+)' +
     r'(?<!\s)(\s*)'+
     r'([\w\(\)\{\}\[\]]?)~~CURSOR~~' +
-    r'([^\w\$\'\"\`$@#%\(\)\{\}\[\]\\]*)'
+    r'([^\w\$\'\"\`$@#%\(\)\{\}\[\]\\\?]*)'
     r'(\s*)'
   )
 
@@ -91,7 +91,7 @@ def _set_new_symbols(state):
     r'[/]?,',
     r'[!<>+*/&|^-]?=+[<>]?',
     r'&&',
-    r'<%=?',
+    r'<%[=-]?',
     r'%>',
     r'\.=',
     r'\|\|',
