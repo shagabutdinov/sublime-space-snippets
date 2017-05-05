@@ -105,16 +105,22 @@ class Listener(sublime_plugin.EventListener):
     expr2 = r'^text(?!.*source.php)'
 
     ignore = (
-      (
-        re.search(expr1, scope_left) == None and
-        re.search(expr1, scope_right) == None
-      ) or (
-        re.search(expr2, scope_left) != None or
-        re.search(expr2, scope_right) != None
-      )
+      re.search(expr1, scope_left) == None and
+      re.search(expr1, scope_right) == None
     )
 
     if ignore:
+      return
+
+    ignore = (
+      re.search(expr2, scope_left) != None or
+      re.search(expr2, scope_right) != None
+    )
+
+    if ignore:
+      return
+
+    if re.search(r'\.jsx(\.js)?\s*$', scope_left) != None:
       return
 
     point = sel.a
