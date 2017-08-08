@@ -61,14 +61,17 @@ class Listener(sublime_plugin.EventListener):
   def on_modified(self, view):
     ignore = (
       self._last_command != None and (
-        "delete" in self._last_command or
-        "undo" in self._last_command or
-        "redo" in self._last_command or
-        "insert" in self._last_command or
-        "ensure" in self._last_command or
-        "snippet" in self._last_command or
-        "completion" in self._last_command or
-        "extract" in self._last_command
+        'delete' in self._last_command or
+        'undo' in self._last_command or
+        'redo' in self._last_command or
+        'insert' in self._last_command or
+        'ensure' in self._last_command or
+        'snippet' in self._last_command or
+        'completion' in self._last_command or
+        'extract' in self._last_command or
+        'save_enhanced' in self._last_command or
+        'save' in self._last_command or
+        'extract_variable' in self._last_command
       )
     )
 
