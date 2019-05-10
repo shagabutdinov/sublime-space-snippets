@@ -124,7 +124,7 @@ class Listener(sublime_plugin.EventListener):
     if ignore:
       return
 
-    if re.search(r'\.jsx(\.js)?\s*$', scope_left) != None:
+    if re.search(r'\.(jsx(\.js)?\s*$|html.jsx)', scope_left) != None:
       return
 
     point = sel.a
